@@ -77,8 +77,9 @@ async def request_login_code(
     db.add(login_code)
     db.commit()
     
-    # TODO: Send code via Telegram bot
-    # This would be implemented in the bot service
+    # Send code via Telegram bot
+    from traffic_share.server.services.bot_service import bot_service
+    await bot_service.send_login_code(request.telegram_id, code)
     
     return {
         "success": True,

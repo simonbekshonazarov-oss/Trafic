@@ -10,6 +10,8 @@ from contextlib import asynccontextmanager
 
 from traffic_share.server.database import create_tables
 from traffic_share.server.routes import auth_routes, user_routes, traffic_routes, buyer_routes, admin_routes, system_routes
+from traffic_share.server.middleware.logging_middleware import LoggingMiddleware
+from traffic_share.server.tasks.background_tasks import background_tasks
 from traffic_share.core.exceptions import TrafficShareException
 
 @asynccontextmanager
@@ -18,8 +20,16 @@ async def lifespan(app: FastAPI):
     # Startup
     create_tables()
     print("Database tables created successfully")
+    
+    # Start background tasks
+    await background_tasks.start()
+    print("Background tasks started")
+    
     yield
+    
     # Shutdown
+    await background_tasks.stop()
+    print("Background tasks stopped")
     print("Application shutting down")
 
 # Create FastAPI app
@@ -44,6 +54,9 @@ app.add_middleware(
     TrustedHostMiddleware,
     allowed_hosts=["*"]  # Configure this properly in production
 )
+
+# Add logging middleware
+app.add_middleware(LoggingMiddleware)
 
 # Global exception handler
 @app.exception_handler(TrafficShareException)

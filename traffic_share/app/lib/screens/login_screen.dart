@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:flutter/services.dart';
+import '../api/api_client.dart';
+import '../api/auth_api.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -12,6 +13,22 @@ class _LoginScreenState extends State<LoginScreen> {
   final _codeController = TextEditingController();
   bool _isLoading = false;
   String _message = '';
+  final AuthApi _authApi = AuthApi();
+  final ApiClient _apiClient = ApiClient();
+
+  @override
+  void initState() {
+    super.initState();
+    _apiClient.init();
+    _checkExistingToken();
+  }
+
+  Future<void> _checkExistingToken() async {
+    await _apiClient.loadToken();
+    if (_apiClient._accessToken != null) {
+      Navigator.pushReplacementNamed(context, '/home');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,23 +135,13 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final response = await http.post(
-        Uri.parse('http://localhost:8000/api/auth/request_login_code'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'telegram_id': int.parse(_telegramIdController.text),
-        }),
+      final result = await _authApi.requestLoginCode(
+        int.parse(_telegramIdController.text),
       );
 
-      if (response.statusCode == 200) {
-        setState(() {
-          _message = 'Login code sent to your Telegram!';
-        });
-      } else {
-        setState(() {
-          _message = 'Error: ${response.body}';
-        });
-      }
+      setState(() {
+        _message = result['message'] ?? 'Login code sent to your Telegram!';
+      });
     } catch (e) {
       setState(() {
         _message = 'Error: $e';
@@ -160,22 +167,16 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final response = await http.post(
-        Uri.parse('http://localhost:8000/api/auth/verify_code'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'telegram_id': int.parse(_telegramIdController.text),
-          'code': _codeController.text,
-        }),
+      final result = await _authApi.verifyCode(
+        telegramId: int.parse(_telegramIdController.text),
+        code: _codeController.text,
       );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        // Store token and navigate to home
+      if (result['access_token'] != null) {
         Navigator.pushReplacementNamed(context, '/home');
       } else {
         setState(() {
-          _message = 'Error: ${response.body}';
+          _message = result['message'] ?? 'Login failed';
         });
       }
     } catch (e) {
