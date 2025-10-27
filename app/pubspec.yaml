@@ -1,0 +1,64 @@
+name: traffic_share
+description: Traffic Share - Earn money by sharing your internet traffic
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # UI
+  cupertino_icons: ^1.0.2
+  google_fonts: ^6.1.0
+  flutter_svg: ^2.0.9
+  
+  # State Management
+  provider: ^6.1.1
+  
+  # HTTP & API
+  http: ^1.1.2
+  dio: ^5.4.0
+  
+  # Storage
+  shared_preferences: ^2.2.2
+  flutter_secure_storage: ^9.0.0
+  
+  # Utils
+  intl: ^0.18.1
+  url_launcher: ^6.2.2
+  connectivity_plus: ^5.0.2
+  
+  # VPN & Networking
+  network_info_plus: ^5.0.1
+  device_info_plus: ^9.1.1
+  
+  # Background Service
+  workmanager: ^0.5.2
+  
+  # UI Components
+  shimmer: ^3.0.0
+  fl_chart: ^0.65.0
+  
+  # Permissions
+  permission_handler: ^11.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/
+  
+  # fonts:
+  #   - family: Poppins
+  #     fonts:
+  #       - asset: fonts/Poppins-Regular.ttf
+  #       - asset: fonts/Poppins-Bold.ttf
+  #         weight: 700
