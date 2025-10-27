@@ -140,7 +140,8 @@ async def get_current_buyer(
             )
         
         # Check if token is expired
-        if buyer_token.expires_at and buyer_token.expires_at < datetime.utcnow():
+        from datetime import datetime as dt
+        if buyer_token.expires_at and buyer_token.expires_at < dt.utcnow():
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Token has expired"
@@ -161,8 +162,7 @@ async def get_current_buyer(
             )
         
         # Update last used timestamp
-        from datetime import datetime
-        buyer_token.last_used_at = datetime.utcnow()
+        buyer_token.last_used_at = dt.utcnow()
         db.commit()
         
         return buyer, buyer_token
