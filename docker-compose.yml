@@ -26,12 +26,12 @@ services:
     environment:
       - DATABASE_URL=postgresql://traffic_user:traffic_pass@postgres:5432/traffic_share
       - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=your-secret-key-change-in-production
+      - DEBUG=False
     depends_on:
       - postgres
       - redis
-    volumes:
-      - .:/app
-    command: python -m traffic_share.server.main
+    command: python -m uvicorn traffic_share.server.main:app --host 0.0.0.0 --port 8000
 
 volumes:
   postgres_data:

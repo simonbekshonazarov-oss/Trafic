@@ -13,7 +13,9 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY . .
+COPY traffic_share ./traffic_share
+COPY alembic.ini .
+COPY alembic ./alembic
 
 # Set environment variables
 ENV PYTHONPATH=/app
@@ -22,4 +24,4 @@ ENV PYTHONPATH=/app
 EXPOSE 8000
 
 # Run the application
-CMD ["python", "-m", "traffic_share.server.main"]
+CMD ["python", "-m", "uvicorn", "traffic_share.server.main:app", "--host", "0.0.0.0", "--port", "8000"]
