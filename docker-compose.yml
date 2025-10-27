@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: traffic_share_db
+    environment:
+      POSTGRES_USER: traffic_user
+      POSTGRES_PASSWORD: traffic_password
+      POSTGRES_DB: traffic_share
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - traffic_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U traffic_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: traffic_share_redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - traffic_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Application
+  api:
+    build: .
+    container_name: traffic_share_api
+    command: uvicorn traffic_share.server.main:app --host 0.0.0.0 --port 8000 --workers 4
+    env_file:
+      - .env
+    volumes:
+      - ./traffic_share:/app/traffic_share
+      - ./logs:/app/logs
+      - ./backups:/app/backups
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - traffic_network
+    restart: unless-stopped
+
+  # Telegram Bot
+  bot:
+    build: .
+    container_name: traffic_share_bot
+    command: python -m traffic_share.bot.bot
+    env_file:
+      - .env
+    volumes:
+      - ./traffic_share:/app/traffic_share
+      - ./logs:/app/logs
+    depends_on:
+      - api
+    networks:
+      - traffic_network
+    restart: unless-stopped
+
+  # Background Tasks
+  tasks:
+    build: .
+    container_name: traffic_share_tasks
+    command: python -m traffic_share.server.tasks.cleanup_task
+    env_file:
+      - .env
+    volumes:
+      - ./traffic_share:/app/traffic_share
+      - ./logs:/app/logs
+      - ./backups:/app/backups
+    depends_on:
+      - api
+    networks:
+      - traffic_network
+    restart: unless-stopped
+
+networks:
+  traffic_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
