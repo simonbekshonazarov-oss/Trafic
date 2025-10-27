@@ -1,0 +1,74 @@
+═══════════════════════════════════════════════════════════════════
+ ANDROID CONFIGURATION - FLUTTER APP
+═══════════════════════════════════════════════════════════════════
+
+Bu fayllarni Flutter app/android papkasiga ko'chirish kerak:
+
+1. AndroidManifest.xml
+   Location: app/android/app/src/main/AndroidManifest.xml
+   
+   Nima qiladi:
+   - Internet permission
+   - Network state permission
+   - WiFi access permission
+   - Foreground service permission
+   - Cleartext traffic (HTTP ga ruxsat)
+
+2. build.gradle (app level)
+   Location: app/android/app/build.gradle
+   
+   Minimal config:
+   
+   android {
+       compileSdkVersion 34
+       
+       defaultConfig {
+           applicationId "com.trafficshare.app"
+           minSdkVersion 21
+           targetSdkVersion 34
+           versionCode 1
+           versionName "1.0.0"
+       }
+       
+       buildTypes {
+           release {
+               signingConfig signingConfigs.release
+               minifyEnabled true
+               shrinkResources true
+           }
+       }
+   }
+
+3. network_security_config.xml
+   Location: app/android/app/src/main/res/xml/network_security_config.xml
+   
+   <?xml version="1.0" encoding="utf-8"?>
+   <network-security-config>
+       <base-config cleartextTrafficPermitted="true">
+           <trust-anchors>
+               <certificates src="system" />
+           </trust-anchors>
+       </base-config>
+       <domain-config cleartextTrafficPermitted="true">
+           <domain includeSubdomains="true">185.139.230.196</domain>
+       </domain-config>
+   </network-security-config>
+
+═══════════════════════════════════════════════════════════════════
+ BUILD KETMA-KETLIGI
+═══════════════════════════════════════════════════════════════════
+
+1. Flutter loyihani yarating (agar yo'q bo'lsa):
+   flutter create --org com.trafficshare traffic_share
+
+2. lib/ papkadagi fayllarni ko'chiring
+
+3. Android configuration fayllarni joylashtiring
+
+4. pubspec.yaml ni yangilang
+
+5. Build qiling:
+   flutter pub get
+   flutter build apk --release
+
+═══════════════════════════════════════════════════════════════════
