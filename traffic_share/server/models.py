@@ -57,7 +57,6 @@ class Admin(Base):
     
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    created_by = Column(Integer, ForeignKey("admins.id"), nullable=True)
 
 
 class LoginCode(Base):
@@ -70,39 +69,44 @@ class LoginCode(Base):
     
     is_used = Column(Boolean, default=False, nullable=False)
     expires_at = Column(DateTime, nullable=False)
-    used_at = Column(DateTime, nullable=True)
-    
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     
     # Relationships
     user = relationship("User", back_populates="login_codes")
     
     __table_args__ = (
-        Index('idx_code_user', 'code', 'user_id'),
-        Index('idx_expires_at', 'expires_at'),
+        Index('idx_code_expires', 'code', 'expires_at'),
     )
 
 
 class Device(Base):
-    """User devices/sessions"""
+    """User devices"""
     __tablename__ = "devices"
     
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    device_id = Column(String(255), unique=True, nullable=False, index=True)
     
+    device_id = Column(String(255), unique=True, nullable=False, index=True)
     device_name = Column(String(255), nullable=True)
-    os = Column(String(50), nullable=True)
+    device_type = Column(String(50), nullable=True)  # android, ios, windows, etc
+    os_version = Column(String(100), nullable=True)
     app_version = Column(String(50), nullable=True)
     
-    last_ip = Column(String(50), nullable=True)
-    last_active_at = Column(DateTime, default=datetime.utcnow)
-    
     is_active = Column(Boolean, default=True, nullable=False)
+    last_seen_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     
     # Relationships
     user = relationship("User", back_populates="devices")
+    traffic_sessions = relationship("TrafficSession", back_populates="device")
+
+
+class TrafficSessionStatus(enum.Enum):
+    """Traffic session status enum"""
+    ACTIVE = "active"
+    PAUSED = "paused"
+    COMPLETED = "completed"
+    FAILED = "failed"
 
 
 class TrafficSession(Base):
@@ -110,49 +114,45 @@ class TrafficSession(Base):
     __tablename__ = "traffic_sessions"
     
     id = Column(Integer, primary_key=True, index=True)
-    session_id = Column(String(255), unique=True, nullable=False, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    device_id = Column(String(255), nullable=True)
+    device_id = Column(Integer, ForeignKey("devices.id"), nullable=False)
     
-    start_time = Column(DateTime, default=datetime.utcnow, nullable=False)
-    end_time = Column(DateTime, nullable=True)
+    session_uuid = Column(String(100), unique=True, nullable=False, index=True)
+    status = Column(Enum(TrafficSessionStatus), default=TrafficSessionStatus.ACTIVE, nullable=False)
     
-    start_ip = Column(String(50), nullable=True)
-    region = Column(String(10), nullable=True)
-    
-    bytes_tx = Column(BigInteger, default=0, nullable=False)  # Transmitted
-    bytes_rx = Column(BigInteger, default=0, nullable=False)  # Received
-    bytes_total = Column(BigInteger, default=0, nullable=False)
-    
-    status = Column(String(20), default="active", nullable=False)  # active, completed, failed
+    bytes_uploaded = Column(BigInteger, default=0, nullable=False)
+    bytes_downloaded = Column(BigInteger, default=0, nullable=False)
+    total_bytes = Column(BigInteger, default=0, nullable=False)
     
     earnings = Column(Float, default=0.0, nullable=False)
     
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    ip_address = Column(String(100), nullable=True)
+    region = Column(String(10), nullable=True)
+    
+    started_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    ended_at = Column(DateTime, nullable=True)
     
     # Relationships
     user = relationship("User", back_populates="traffic_sessions")
+    device = relationship("Device", back_populates="traffic_sessions")
     traffic_logs = relationship("TrafficLog", back_populates="session")
     
     __table_args__ = (
         Index('idx_user_status', 'user_id', 'status'),
-        Index('idx_session_id', 'session_id'),
+        Index('idx_session_uuid', 'session_uuid'),
     )
 
 
 class TrafficLog(Base):
-    """Detailed traffic logs (periodic updates)"""
+    """Detailed traffic logs"""
     __tablename__ = "traffic_logs"
     
     id = Column(Integer, primary_key=True, index=True)
     session_id = Column(Integer, ForeignKey("traffic_sessions.id"), nullable=False)
     
-    bytes_tx = Column(BigInteger, default=0, nullable=False)
-    bytes_rx = Column(BigInteger, default=0, nullable=False)
-    interval_seconds = Column(Integer, nullable=True)
-    
-    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)
+    bytes_transferred = Column(BigInteger, nullable=False)
+    connection_count = Column(Integer, default=0, nullable=False)
     
     # Relationships
     session = relationship("TrafficSession", back_populates="traffic_logs")
@@ -163,22 +163,22 @@ class TrafficLog(Base):
 
 
 class Buyer(Base):
-    """Traffic buyers/consumers"""
+    """Buyers who purchase traffic"""
     __tablename__ = "buyers"
     
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False)
-    contact = Column(String(255), nullable=True)
-    region = Column(String(10), nullable=True)
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    company = Column(String(255), nullable=True)
+    
+    api_key = Column(String(100), unique=True, nullable=False, index=True)
     
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
     tokens = relationship("BuyerToken", back_populates="buyer")
-    packages = relationship("Package", back_populates="buyer")
-    allocations = relationship("PackageAllocation", back_populates="buyer")
+    package_allocations = relationship("PackageAllocation", back_populates="buyer")
 
 
 class BuyerToken(Base):
@@ -189,110 +189,94 @@ class BuyerToken(Base):
     buyer_id = Column(Integer, ForeignKey("buyers.id"), nullable=False)
     
     token_hash = Column(String(255), unique=True, nullable=False, index=True)
-    description = Column(String(255), nullable=True)
+    name = Column(String(255), nullable=True)
     
     is_revoked = Column(Boolean, default=False, nullable=False)
     expires_at = Column(DateTime, nullable=True)
     last_used_at = Column(DateTime, nullable=True)
-    
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     
     # Relationships
     buyer = relationship("Buyer", back_populates="tokens")
-    
-    __table_args__ = (
-        Index('idx_token_hash', 'token_hash'),
-    )
+
+
+class PackageStatus(enum.Enum):
+    """Package status enum"""
+    PENDING = "pending"
+    ALLOCATED = "allocated"
+    IN_USE = "in_use"
+    COMPLETED = "completed"
+    EXPIRED = "expired"
 
 
 class Package(Base):
-    """Traffic packages for allocation"""
+    """Traffic packages"""
     __tablename__ = "packages"
     
     id = Column(Integer, primary_key=True, index=True)
-    uuid = Column(String(255), unique=True, nullable=False, index=True)
+    package_uuid = Column(String(100), unique=True, nullable=False, index=True)
     
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    ip = Column(String(50), nullable=False)
-    size_bytes = Column(BigInteger, nullable=False)
+    size_gb = Column(Float, nullable=False)
+    region = Column(String(10), nullable=False)
     
-    assigned_buyer_id = Column(Integer, ForeignKey("buyers.id"), nullable=True)
-    status = Column(
-        String(20), 
-        default="available", 
-        nullable=False, 
-        index=True
-    )  # available, allocated, in_progress, completed, failed, revoked
-    
-    bytes_sent = Column(BigInteger, default=0, nullable=False)
-    
-    allocated_at = Column(DateTime, nullable=True)
-    completed_at = Column(DateTime, nullable=True)
+    status = Column(Enum(PackageStatus), default=PackageStatus.PENDING, nullable=False)
     
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    allocated_at = Column(DateTime, nullable=True)
+    expires_at = Column(DateTime, nullable=True)
     
     # Relationships
-    buyer = relationship("Buyer", back_populates="packages")
     allocations = relationship("PackageAllocation", back_populates="package")
     
     __table_args__ = (
-        Index('idx_status_buyer', 'status', 'assigned_buyer_id'),
-        Index('idx_user_ip', 'user_id', 'ip'),
+        Index('idx_status_region', 'status', 'region'),
     )
 
 
 class PackageAllocation(Base):
-    """Package allocation history/audit log"""
+    """Package allocation history"""
     __tablename__ = "package_allocations"
     
     id = Column(Integer, primary_key=True, index=True)
     package_id = Column(Integer, ForeignKey("packages.id"), nullable=False)
     buyer_id = Column(Integer, ForeignKey("buyers.id"), nullable=False)
     
-    status = Column(String(20), nullable=False)
-    bytes_sent = Column(BigInteger, default=0)
-    
+    bytes_used = Column(BigInteger, default=0, nullable=False)
     allocated_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     completed_at = Column(DateTime, nullable=True)
     
     # Relationships
     package = relationship("Package", back_populates="allocations")
-    buyer = relationship("Buyer", back_populates="allocations")
-    
-    __table_args__ = (
-        Index('idx_buyer_status', 'buyer_id', 'status'),
-        Index('idx_allocated_at', 'allocated_at'),
-    )
+    buyer = relationship("Buyer", back_populates="package_allocations")
+
+
+class PaymentStatus(enum.Enum):
+    """Payment status enum"""
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
 
 
 class Payment(Base):
-    """Payment/withdrawal records"""
+    """Payments and withdrawals"""
     __tablename__ = "payments"
     
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     
     amount = Column(Float, nullable=False)
-    currency = Column(String(10), default="USD", nullable=False)
+    payment_method = Column(String(50), nullable=False)  # cryptomus
+    payment_address = Column(String(255), nullable=True)
     
-    method = Column(String(50), default="cryptomus", nullable=False)
-    target = Column(String(255), nullable=True)  # Wallet address or email
+    status = Column(Enum(PaymentStatus), default=PaymentStatus.PENDING, nullable=False)
     
-    status = Column(
-        String(20), 
-        default="pending", 
-        nullable=False, 
-        index=True
-    )  # pending, processing, completed, failed, cancelled
-    
-    tx_reference = Column(String(255), nullable=True)  # External transaction ID
-    tx_hash = Column(String(255), nullable=True)  # Blockchain transaction hash
-    
-    error_message = Column(Text, nullable=True)
+    external_id = Column(String(255), nullable=True, index=True)
+    transaction_hash = Column(String(255), nullable=True)
     
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    processed_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     completed_at = Column(DateTime, nullable=True)
     
     # Relationships
@@ -300,26 +284,23 @@ class Payment(Base):
     
     __table_args__ = (
         Index('idx_user_status', 'user_id', 'status'),
-        Index('idx_status', 'status'),
+        Index('idx_external_id', 'external_id'),
     )
 
 
 class Notification(Base):
-    """System notifications"""
+    """User notifications"""
     __tablename__ = "notifications"
     
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # NULL = broadcast
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     
-    type = Column(String(50), nullable=False)  # login, payment, traffic, system, etc.
     title = Column(String(255), nullable=False)
     message = Column(Text, nullable=False)
+    notification_type = Column(String(50), nullable=False)
     
     is_read = Column(Boolean, default=False, nullable=False)
-    sent_via_bot = Column(Boolean, default=False, nullable=False)
-    
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    read_at = Column(DateTime, nullable=True)
 
 
 class AuditLog(Base):
@@ -328,7 +309,7 @@ class AuditLog(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     
-    action = Column(String(100), nullable=False, index=True)
+    action = Column(String(100), nullable=False)
     entity_type = Column(String(50), nullable=True)
     entity_id = Column(Integer, nullable=True)
     
@@ -336,17 +317,17 @@ class AuditLog(Base):
     admin_id = Column(Integer, nullable=True)
     buyer_id = Column(Integer, nullable=True)
     
-    details = Column(Text, nullable=True)  # JSON string
-    ip_address = Column(String(50), nullable=True)
+    details = Column(Text, nullable=True)
+    ip_address = Column(String(100), nullable=True)
     
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     
     __table_args__ = (
         Index('idx_action_created', 'action', 'created_at'),
     )
 
 
-class SystemMetric(Base):
+class SystemMetrics(Base):
     """System metrics and statistics"""
     __tablename__ = "system_metrics"
     
@@ -356,10 +337,38 @@ class SystemMetric(Base):
     metric_value = Column(Float, nullable=False)
     metric_unit = Column(String(50), nullable=True)
     
-    tags = Column(Text, nullable=True)  # JSON string for additional metadata
-    
-    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)
     
     __table_args__ = (
         Index('idx_metric_timestamp', 'metric_name', 'timestamp'),
+    )
+
+
+class AppVersion(Base):
+    """App version management for OTA updates"""
+    __tablename__ = "app_versions"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    
+    version = Column(String(50), nullable=False, unique=True, index=True)
+    version_code = Column(Integer, nullable=False, unique=True)
+    
+    platform = Column(String(20), nullable=False)  # android, ios
+    min_supported_version = Column(String(50), nullable=True)
+    
+    download_url = Column(String(500), nullable=False)
+    file_size = Column(BigInteger, nullable=True)
+    checksum = Column(String(255), nullable=True)
+    
+    release_notes = Column(Text, nullable=True)
+    
+    is_mandatory = Column(Boolean, default=False, nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    published_at = Column(DateTime, nullable=True)
+    
+    __table_args__ = (
+        Index('idx_platform_version', 'platform', 'version_code'),
+        Index('idx_active', 'is_active', 'platform'),
     )

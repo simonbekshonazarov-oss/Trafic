@@ -7,6 +7,40 @@ from typing import Optional, List
 from pydantic import BaseModel, Field, EmailStr, validator
 
 
+# ==================== App Update Schemas ====================
+
+class CheckUpdateRequest(BaseModel):
+    platform: str = Field(..., description="android or ios")
+    current_version: str = Field(..., description="Current app version (e.g., 1.0.0+1)")
+    device_id: Optional[str] = None
+
+
+class CheckUpdateResponse(BaseModel):
+    update_available: bool
+    latest_version: Optional[str] = None
+    version_code: Optional[int] = None
+    download_url: Optional[str] = None
+    file_size: Optional[int] = None
+    checksum: Optional[str] = None
+    release_notes: Optional[str] = None
+    is_mandatory: bool = False
+    message: str
+
+
+class AppVersionResponse(BaseModel):
+    ok: bool
+    version: Optional[str] = None
+    version_code: Optional[int] = None
+    platform: Optional[str] = None
+    download_url: Optional[str] = None
+    file_size: Optional[int] = None
+    checksum: Optional[str] = None
+    release_notes: Optional[str] = None
+    is_mandatory: bool = False
+    published_at: Optional[datetime] = None
+    message: Optional[str] = None
+
+
 # ==================== Auth Schemas ====================
 
 class RegisterRequest(BaseModel):

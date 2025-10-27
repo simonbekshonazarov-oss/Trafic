@@ -22,7 +22,8 @@ from traffic_share.server.routes import (
     payment_routes,
     buyer_routes,
     admin_routes,
-    system_routes
+    system_routes,
+    update_routes
 )
 
 
@@ -128,6 +129,7 @@ app.include_router(payment_routes.router, prefix="/api")
 app.include_router(buyer_routes.router, prefix="/api")
 app.include_router(admin_routes.router, prefix="/api")
 app.include_router(system_routes.router, prefix="/api")
+app.include_router(update_routes.router, prefix="/api")
 
 
 # Root endpoint
