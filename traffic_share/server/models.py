@@ -283,7 +283,6 @@ class Payment(Base):
     user = relationship("User", back_populates="payments")
     
     __table_args__ = (
-        Index('idx_user_status', 'user_id', 'status'),
         Index('idx_external_id', 'external_id'),
     )
 
