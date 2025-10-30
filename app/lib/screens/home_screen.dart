@@ -9,7 +9,7 @@ import '../widgets/balance_card.dart';
 import '../widgets/stats_card.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -192,6 +192,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _handleLogout(BuildContext context) async {
     final auth = Provider.of<AuthProvider>(context, listen: false);
     await auth.logout();
-    Navigator.pushReplacementNamed(context, '/login');
+    if (context.mounted) {
+      Navigator.pushReplacementNamed(context, '/login');
+    }
   }
 }

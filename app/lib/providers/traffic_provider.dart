@@ -97,7 +97,7 @@ class TrafficProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       // Handle error
-      print('Update session error: $e');
+      debugPrint('Update session error: $e');
     }
   }
 
@@ -142,7 +142,7 @@ class TrafficProvider with ChangeNotifier {
       _summary = TrafficSummary.fromJson(data);
       notifyListeners();
     } catch (e) {
-      print('Load summary error: $e');
+      debugPrint('Load summary error: $e');
     }
   }
 
@@ -152,7 +152,7 @@ class TrafficProvider with ChangeNotifier {
       _history = data.map((json) => TrafficSession.fromJson(json)).toList();
       notifyListeners();
     } catch (e) {
-      print('Load history error: $e');
+      debugPrint('Load history error: $e');
     }
   }
 

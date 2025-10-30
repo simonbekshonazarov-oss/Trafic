@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../api/auth_api.dart';
 import '../api/user_api.dart';
 import '../models/user_model.dart';
-import '../utils/constants.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthApi _authApi = AuthApi();
@@ -73,7 +71,7 @@ class AuthProvider with ChangeNotifier {
       _error = null;
       notifyListeners();
 
-      final response = await _authApi.verifyCode(
+      await _authApi.verifyCode(
         telegramId: telegramId,
         code: code,
       );

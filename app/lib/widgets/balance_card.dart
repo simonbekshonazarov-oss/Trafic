@@ -4,7 +4,7 @@ import '../providers/balance_provider.dart';
 import '../utils/constants.dart';
 
 class BalanceCard extends StatelessWidget {
-  const BalanceCard({Key? key}) : super(key: key);
+  const BalanceCard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +67,7 @@ class BalanceCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(

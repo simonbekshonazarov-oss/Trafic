@@ -16,12 +16,13 @@ class UpdateService {
       final platform = Platform.isAndroid ? 'android' : 'ios';
       
       final response = await _apiClient.post(
-        '${ApiConfig.baseUrl}/updates/check',
-        body: {
+        '/updates/check',
+        {
           'platform': platform,
           'current_version': '${packageInfo.version}+${packageInfo.buildNumber}',
           'device_id': await _getDeviceId(),
         },
+        requireAuth: true,
       );
       
       if (response['update_available'] == true) {
