@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import '../api/traffic_api.dart';
@@ -97,7 +98,7 @@ class TrafficProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       // Handle error
-      print('Update session error: $e');
+      debugPrint('Update session error: $e');
     }
   }
 
@@ -142,7 +143,7 @@ class TrafficProvider with ChangeNotifier {
       _summary = TrafficSummary.fromJson(data);
       notifyListeners();
     } catch (e) {
-      print('Load summary error: $e');
+      debugPrint('Load summary error: $e');
     }
   }
 
@@ -152,7 +153,7 @@ class TrafficProvider with ChangeNotifier {
       _history = data.map((json) => TrafficSession.fromJson(json)).toList();
       notifyListeners();
     } catch (e) {
-      print('Load history error: $e');
+      debugPrint('Load history error: $e');
     }
   }
 

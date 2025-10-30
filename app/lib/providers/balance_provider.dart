@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import '../api/user_api.dart';
 
 class BalanceProvider with ChangeNotifier {
@@ -31,7 +32,7 @@ class BalanceProvider with ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      print('Load balance error: $e');
+      debugPrint('Load balance error: $e');
     }
   }
 

@@ -4,7 +4,7 @@ import '../providers/traffic_provider.dart';
 import '../utils/constants.dart';
 
 class StatsCard extends StatelessWidget {
-  const StatsCard({Key? key}) : super(key: key);
+  const StatsCard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +75,7 @@ class StatsCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: color, size: 32),
