@@ -4,7 +4,7 @@ import '../providers/auth_provider.dart';
 import '../utils/constants.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -133,6 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
       
       final success = await auth.requestLoginCode(telegramId);
+      if (!mounted) return;
       if (success) {
         setState(() => _codeSent = true);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -156,6 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
         code: code,
       );
       
+      if (!mounted) return;
       if (success) {
         Navigator.pushReplacementNamed(context, '/home');
       }
