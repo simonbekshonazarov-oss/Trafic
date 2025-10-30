@@ -16,8 +16,8 @@ class UpdateService {
       final platform = Platform.isAndroid ? 'android' : 'ios';
       
       final response = await _apiClient.post(
-        '${ApiConfig.baseUrl}/updates/check',
-        body: {
+        ApiConfig.updatesCheck,
+        {
           'platform': platform,
           'current_version': '${packageInfo.version}+${packageInfo.buildNumber}',
           'device_id': await _getDeviceId(),

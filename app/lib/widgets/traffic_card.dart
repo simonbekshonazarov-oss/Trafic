@@ -4,7 +4,7 @@ import '../providers/traffic_provider.dart';
 import '../utils/constants.dart';
 
 class TrafficCard extends StatelessWidget {
-  const TrafficCard({Key? key}) : super(key: key);
+  const TrafficCard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +118,7 @@ class TrafficCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -177,6 +177,9 @@ class TrafficCard extends StatelessWidget {
 
   Future<void> _startSharing(BuildContext context, TrafficProvider traffic) async {
     final success = await traffic.startSharing();
+    if (!context.mounted) {
+      return;
+    }
     if (!success) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to start sharing')),
@@ -186,6 +189,9 @@ class TrafficCard extends StatelessWidget {
 
   Future<void> _stopSharing(BuildContext context, TrafficProvider traffic) async {
     final success = await traffic.stopSharing();
+    if (!context.mounted) {
+      return;
+    }
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
