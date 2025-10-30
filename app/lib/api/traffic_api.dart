@@ -57,18 +57,36 @@ class TrafficApi {
     );
   }
 
-  Future<List<dynamic>> getHistory({int page = 1, int pageSize = 50}) async {
+  Future<List<Map<String, dynamic>>> getHistory({int page = 1, int pageSize = 50}) async {
     final response = await _client.get(
       '${ApiConfig.trafficHistory}?page=$page&page_size=$pageSize',
       requireAuth: true,
     );
-    return response as List<dynamic>;
+
+    if (response is List) {
+      return response.cast<Map<String, dynamic>>();
+    }
+
+    if (response is Map<String, dynamic>) {
+      final items = response['items'] ?? response['results'] ?? response['data'];
+      if (items is List) {
+        return items.cast<Map<String, dynamic>>();
+      }
+    }
+
+    return <Map<String, dynamic>>[];
   }
 
   Future<Map<String, dynamic>> getSummary() async {
-    return await _client.get(
+    final response = await _client.get(
       ApiConfig.trafficSummary,
       requireAuth: true,
     );
+
+    if (response is Map<String, dynamic>) {
+      return response;
+    }
+
+    return <String, dynamic>{};
   }
 }

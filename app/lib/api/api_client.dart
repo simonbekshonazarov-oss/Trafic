@@ -69,8 +69,26 @@ class ApiClient {
       _handleUnauthorized();
       throw Exception('Unauthorized');
     } else {
-      final error = jsonDecode(response.body);
-      throw Exception(error['detail'] ?? 'Request failed');
+      dynamic errorBody;
+      if (response.body.isNotEmpty) {
+        try {
+          errorBody = jsonDecode(response.body);
+        } catch (_) {
+          // Ignore decode errors for non-JSON responses
+        }
+      }
+
+      String message = 'Request failed (${response.statusCode})';
+      if (errorBody is Map<String, dynamic>) {
+        final detail = errorBody['detail'] ?? errorBody['message'] ?? errorBody['error'];
+        if (detail != null) {
+          message = detail.toString();
+        }
+      } else if (errorBody is String && errorBody.isNotEmpty) {
+        message = errorBody;
+      }
+
+      throw Exception(message);
     }
   }
 

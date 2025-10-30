@@ -1,8 +1,11 @@
 import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../api/api_client.dart';
 import '../utils/constants.dart';
 
@@ -16,16 +19,18 @@ class UpdateService {
       final platform = Platform.isAndroid ? 'android' : 'ios';
       
       final response = await _apiClient.post(
-        '${ApiConfig.baseUrl}/updates/check',
-        body: {
+        ApiConfig.updateCheck,
+        {
           'platform': platform,
           'current_version': '${packageInfo.version}+${packageInfo.buildNumber}',
           'device_id': await _getDeviceId(),
         },
       );
-      
-      if (response['update_available'] == true) {
-        return UpdateInfo.fromJson(response);
+
+      if (response is Map<String, dynamic>) {
+        if (response['update_available'] == true) {
+          return UpdateInfo.fromJson(response);
+        }
       }
       
       return null;
@@ -76,24 +81,29 @@ class UpdateService {
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/$filename');
       
-      final request = await http.Client().send(http.Request('GET', Uri.parse(url)));
-      final total = request.contentLength ?? 0;
-      var downloaded = 0;
-      
-      final sink = file.openWrite();
-      
-      await for (var chunk in request.stream) {
-        sink.add(chunk);
-        downloaded += chunk.length;
-        
-        if (onProgress != null && total > 0) {
-          onProgress(downloaded / total);
+      final client = http.Client();
+      try {
+        final request = await client.send(http.Request('GET', Uri.parse(url)));
+        final total = request.contentLength ?? 0;
+        var downloaded = 0;
+
+        final sink = file.openWrite();
+        try {
+          await for (var chunk in request.stream) {
+            sink.add(chunk);
+            downloaded += chunk.length;
+
+            if (onProgress != null && total > 0) {
+              onProgress(downloaded / total);
+            }
+          }
+        } finally {
+          await sink.close();
         }
+        return file.path;
+      } finally {
+        client.close();
       }
-      
-      await sink.close();
-      
-      return file.path;
     } catch (e) {
       debugPrint('Download file error: $e');
       return null;
@@ -109,8 +119,16 @@ class UpdateService {
   
   /// Get device ID
   Future<String> _getDeviceId() async {
-    // Implementation depends on device_info_plus or similar package
-    return 'device_id_placeholder';
+    final prefs = await SharedPreferences.getInstance();
+    final existing = prefs.getString(AppConstants.keyDeviceId);
+    if (existing != null && existing.isNotEmpty) {
+      return existing;
+    }
+
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final newId = 'device-$timestamp';
+    await prefs.setString(AppConstants.keyDeviceId, newId);
+    return newId;
   }
   
   /// Open app store for update (iOS)

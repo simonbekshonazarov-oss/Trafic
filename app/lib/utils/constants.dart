@@ -24,6 +24,7 @@ class ApiConfig {
   static const String balance = '/balance';
   static const String withdrawRequest = '/withdraw/request';
   static const String withdrawStatus = '/withdraw/status';
+  static const String updateCheck = '/updates/check';
 }
 
 // App Colors

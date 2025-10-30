@@ -1,7 +1,8 @@
 import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:network_info_plus/network_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../api/traffic_api.dart';
 import '../models/traffic_model.dart';
 import '../utils/constants.dart';
@@ -33,20 +34,15 @@ class TrafficProvider with ChangeNotifier {
       _status = TrafficStatus.starting;
       notifyListeners();
 
-      // Get device info
-      final deviceInfo = DeviceInfoPlugin();
-      final androidInfo = await deviceInfo.androidInfo;
-      final deviceId = androidInfo.id;
-
-      // Get network info
-      final networkInfo = NetworkInfo();
-      final wifiIP = await networkInfo.getWifiIP();
+      // Prepare identifiers
+      final deviceId = await _getOrCreateDeviceId();
+      final localIp = await _getLocalIpAddress();
 
       // Start session
       final response = await _trafficApi.startSession(
         deviceId: deviceId,
-        localIp: wifiIP,
-        publicIp: wifiIP,
+        localIp: localIp,
+        publicIp: null,
         clientVersion: AppConstants.appVersion,
       );
 
@@ -105,6 +101,40 @@ class TrafficProvider with ChangeNotifier {
     // Simulate random traffic (1-10 MB per 10 seconds)
     // In real app, measure actual network traffic
     return (1 + (9 * (DateTime.now().millisecond / 1000))).toInt() * 1024 * 1024;
+  }
+
+  Future<String> _getOrCreateDeviceId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final existing = prefs.getString(AppConstants.keyDeviceId);
+    if (existing != null && existing.isNotEmpty) {
+      return existing;
+    }
+
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final newId = 'device-$timestamp';
+    await prefs.setString(AppConstants.keyDeviceId, newId);
+    return newId;
+  }
+
+  Future<String?> _getLocalIpAddress() async {
+    try {
+      final interfaces = await NetworkInterface.list(
+        includeLoopback: false,
+        type: InternetAddressType.IPv4,
+      );
+
+      for (final interface in interfaces) {
+        for (final addr in interface.addresses) {
+          if (!addr.isLoopback && addr.type == InternetAddressType.IPv4) {
+            return addr.address;
+          }
+        }
+      }
+    } catch (_) {
+      // Ignore errors and fallback to null
+    }
+
+    return null;
   }
 
   Future<bool> stopSharing() async {
