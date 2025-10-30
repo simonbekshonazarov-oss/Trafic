@@ -1,0 +1,64 @@
+2025-10-30 16:59:12 - traffic_share - ERROR - Test failed: EOF when reading a line
+Traceback (most recent call last):
+  File "/workspace/test_bot_send.py", line 62, in <module>
+    asyncio.run(test_send_code())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/test_bot_send.py", line 25, in test_send_code
+    telegram_id = input("Telegram ID kiriting (test uchun): ")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+EOFError: EOF when reading a line
+2025-10-30 16:59:14 - traffic_share - INFO - Initializing database...
+2025-10-30 16:59:14 - traffic_share - ERROR - Database initialization failed: (psycopg2.OperationalError) connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-10-30 16:59:17 - traffic_share - INFO - Starting Traffic Share API...
+2025-10-30 16:59:17 - traffic_share - ERROR - Database initialization failed: (psycopg2.OperationalError) connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-10-30 16:59:17 - traffic_share - ERROR - Failed to connect to Redis: Error 111 connecting to localhost:6379. 111.
+2025-10-30 16:59:17 - traffic_share - INFO - Redis connected for rate limiting
+2025-10-30 16:59:17 - traffic_share - INFO - Traffic Share API started successfully!
+2025-10-30 16:59:17 - traffic_share - INFO - Starting Traffic Share API...
+2025-10-30 16:59:17 - traffic_share - ERROR - Database initialization failed: (psycopg2.OperationalError) connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-10-30 16:59:17 - traffic_share - ERROR - Failed to connect to Redis: Error 111 connecting to localhost:6379. 111.
+2025-10-30 16:59:17 - traffic_share - INFO - Redis connected for rate limiting
+2025-10-30 16:59:17 - traffic_share - INFO - Traffic Share API started successfully!
+2025-10-30 16:59:17 - traffic_share - INFO - Starting Traffic Share API...
+2025-10-30 16:59:17 - traffic_share - ERROR - Database initialization failed: (psycopg2.OperationalError) connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-10-30 16:59:17 - traffic_share - ERROR - Failed to connect to Redis: Error 111 connecting to localhost:6379. 111.
+2025-10-30 16:59:17 - traffic_share - INFO - Redis connected for rate limiting
+2025-10-30 16:59:17 - traffic_share - INFO - Traffic Share API started successfully!
+2025-10-30 16:59:18 - traffic_share - INFO - Starting Traffic Share API...
+2025-10-30 16:59:18 - traffic_share - ERROR - Database initialization failed: (psycopg2.OperationalError) connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-10-30 16:59:18 - traffic_share - ERROR - Failed to connect to Redis: Error 111 connecting to localhost:6379. 111.
+2025-10-30 16:59:18 - traffic_share - INFO - Redis connected for rate limiting
+2025-10-30 16:59:18 - traffic_share - INFO - Traffic Share API started successfully!

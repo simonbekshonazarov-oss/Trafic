@@ -47,9 +47,16 @@ async def request_login_code(
         service = AuthService(db)
         user, code = service.generate_login_code(request.telegram_id)
         
-        # TODO: Send code via Telegram bot
-        # For now, we just generate it
-        # In production, this should trigger bot to send message
+        # Send code via Telegram bot
+        from traffic_share.bot.bot import send_login_code
+        
+        success = await send_login_code(request.telegram_id, code)
+        
+        if not success:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to send login code. Please check your Telegram ID."
+            )
         
         return LoginCodeResponse(ok=True)
     except TrafficShareException as e:
