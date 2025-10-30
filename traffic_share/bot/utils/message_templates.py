@@ -2,6 +2,8 @@
 Message templates for bot responses
 """
 
+from datetime import datetime
+
 
 def welcome_message(username: str = None) -> str:
     """Welcome message template"""
@@ -76,6 +78,3 @@ Event: {event}
 Details: {details}
 Time: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC
     """
-
-
-from datetime import datetime

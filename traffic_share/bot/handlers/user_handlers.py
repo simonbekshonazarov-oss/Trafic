@@ -15,7 +15,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = update.effective_user.id
     username = update.effective_user.username
     
-    welcome_message = f"""
+    welcome_message = """
 👋 Welcome to Traffic Share!
 
 You can earn money by sharing your internet traffic through our app.

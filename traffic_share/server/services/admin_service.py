@@ -11,7 +11,7 @@ from traffic_share.server.models import (
     User, Admin, TrafficSession, Payment, Package, Buyer, AuditLog
 )
 from traffic_share.server.schemas import DailyReportResponse, MetricsResponse
-from traffic_share.core.exceptions import ResourceNotFoundError, AuthorizationError
+from traffic_share.core.exceptions import ResourceNotFoundError, AuthorizationError, ValidationError
 from traffic_share.server.logger import logger
 from traffic_share.server.utils import bytes_to_gb
 

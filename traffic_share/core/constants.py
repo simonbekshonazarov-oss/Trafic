@@ -78,7 +78,7 @@ REDIS_SESSION_EXPIRE = 86400  # 24 hours
 
 # API versioning
 API_VERSION = "v1"
-API_PREFIX = f"/api"
+API_PREFIX = "/api"
 
 # System
 APP_NAME = "Traffic Share"

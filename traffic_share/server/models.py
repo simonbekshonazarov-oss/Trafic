@@ -326,7 +326,7 @@ class AuditLog(Base):
     )
 
 
-class SystemMetrics(Base):
+class SystemMetric(Base):
     """System metrics and statistics"""
     __tablename__ = "system_metrics"
     
