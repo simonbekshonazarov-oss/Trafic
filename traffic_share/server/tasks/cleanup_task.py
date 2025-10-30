@@ -11,7 +11,7 @@ from traffic_share.server.config import settings
 from traffic_share.server.logger import logger
 
 
-async def cleanup_expired_login_codes():
+def cleanup_expired_login_codes():
     """Delete expired login codes"""
     with get_db_context() as db:
         try:
@@ -29,7 +29,7 @@ async def cleanup_expired_login_codes():
             logger.error(f"Error cleaning login codes: {e}")
 
 
-async def cleanup_stale_sessions():
+def cleanup_stale_sessions():
     """Mark stale active sessions as failed"""
     with get_db_context() as db:
         try:
@@ -53,7 +53,7 @@ async def cleanup_stale_sessions():
             logger.error(f"Error cleaning stale sessions: {e}")
 
 
-async def cleanup_stale_packages():
+def cleanup_stale_packages():
     """Reset stale allocated packages to available"""
     with get_db_context() as db:
         try:
@@ -73,9 +73,9 @@ async def run_cleanup_tasks():
     """Run all cleanup tasks"""
     logger.info("Running cleanup tasks...")
     
-    await cleanup_expired_login_codes()
-    await cleanup_stale_sessions()
-    await cleanup_stale_packages()
+    cleanup_expired_login_codes()
+    cleanup_stale_sessions()
+    cleanup_stale_packages()
     
     logger.info("Cleanup tasks completed")
 

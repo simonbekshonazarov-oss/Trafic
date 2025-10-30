@@ -3,7 +3,7 @@ Telegram bot for Traffic Share
 """
 
 import asyncio
-from telegram import Update
+from telegram import Update, Bot
 from telegram.ext import (
     Application, CommandHandler, MessageHandler,
     CallbackQueryHandler, ContextTypes, filters
@@ -18,6 +18,18 @@ from traffic_share.bot.handlers.admin_handlers import (
     admin_panel_command, users_command, system_command
 )
 from traffic_share.bot.handlers.callback_handlers import button_callback
+
+
+# Global bot instance
+_bot_instance = None
+
+
+def get_bot() -> Bot:
+    """Get or create bot instance"""
+    global _bot_instance
+    if _bot_instance is None:
+        _bot_instance = Bot(token=settings.TELEGRAM_BOT_TOKEN)
+    return _bot_instance
 
 
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -55,32 +67,36 @@ def create_bot_application():
 async def send_login_code(telegram_id: int, code: str):
     """Send login code to user"""
     try:
-        application = create_bot_application()
-        await application.bot.send_message(
+        bot = get_bot()
+        await bot.send_message(
             chat_id=telegram_id,
             text=f"🔐 Your login code: `{code}`\n\nUse this code to login to the app.",
             parse_mode="Markdown"
         )
         logger.info(f"Login code sent to {telegram_id}")
+        return True
     except Exception as e:
-        logger.error(f"Failed to send login code: {e}")
+        logger.error(f"Failed to send login code to {telegram_id}: {e}", exc_info=True)
+        return False
 
 
 async def send_notification(telegram_id: int, message: str, title: str = None):
     """Send notification to user"""
     try:
-        application = create_bot_application()
+        bot = get_bot()
         
         text = f"📢 *{title}*\n\n{message}" if title else message
         
-        await application.bot.send_message(
+        await bot.send_message(
             chat_id=telegram_id,
             text=text,
             parse_mode="Markdown"
         )
         logger.info(f"Notification sent to {telegram_id}")
+        return True
     except Exception as e:
-        logger.error(f"Failed to send notification: {e}")
+        logger.error(f"Failed to send notification to {telegram_id}: {e}", exc_info=True)
+        return False
 
 
 async def notify_admin(message: str):
@@ -88,20 +104,26 @@ async def notify_admin(message: str):
     try:
         admin_ids = settings.get_admin_ids()
         if not admin_ids:
-            return
+            logger.warning("No admin IDs configured")
+            return False
         
-        application = create_bot_application()
+        bot = get_bot()
         
         for admin_id in admin_ids:
-            await application.bot.send_message(
-                chat_id=admin_id,
-                text=f"🔔 *Admin Alert*\n\n{message}",
-                parse_mode="Markdown"
-            )
+            try:
+                await bot.send_message(
+                    chat_id=admin_id,
+                    text=f"🔔 *Admin Alert*\n\n{message}",
+                    parse_mode="Markdown"
+                )
+            except Exception as e:
+                logger.error(f"Failed to send to admin {admin_id}: {e}")
         
         logger.info("Admin notification sent")
+        return True
     except Exception as e:
-        logger.error(f"Failed to send admin notification: {e}")
+        logger.error(f"Failed to send admin notification: {e}", exc_info=True)
+        return False
 
 
 def run_bot():
