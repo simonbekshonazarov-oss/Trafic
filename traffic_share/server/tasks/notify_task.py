@@ -10,7 +10,7 @@ from traffic_share.server.models import Notification
 from traffic_share.server.logger import logger
 
 
-async def process_pending_notifications():
+def process_pending_notifications():
     """Process notifications that need to be sent"""
     with get_db_context() as db:
         try:
@@ -40,7 +40,7 @@ async def notify_task_loop():
     """Periodic notification processing loop"""
     while True:
         try:
-            await process_pending_notifications()
+            process_pending_notifications()
         except Exception as e:
             logger.error(f"Notify task error: {e}")
         

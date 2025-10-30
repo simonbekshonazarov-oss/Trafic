@@ -15,7 +15,7 @@ from traffic_share.server.config import settings
 from traffic_share.server.logger import logger
 
 
-async def collect_user_stats():
+def collect_user_stats():
     """Collect user statistics"""
     with get_db_context() as db:
         try:
@@ -42,7 +42,7 @@ async def collect_user_stats():
             logger.error(f"Error collecting user stats: {e}")
 
 
-async def collect_traffic_stats():
+def collect_traffic_stats():
     """Collect traffic statistics"""
     with get_db_context() as db:
         try:
@@ -85,7 +85,7 @@ async def collect_traffic_stats():
             logger.error(f"Error collecting traffic stats: {e}")
 
 
-async def collect_payment_stats():
+def collect_payment_stats():
     """Collect payment statistics"""
     with get_db_context() as db:
         try:
@@ -114,7 +114,7 @@ async def collect_payment_stats():
             logger.error(f"Error collecting payment stats: {e}")
 
 
-async def collect_package_stats():
+def collect_package_stats():
     """Collect package statistics"""
     with get_db_context() as db:
         try:
@@ -146,10 +146,10 @@ async def run_stats_collection():
     """Run all statistics collection"""
     logger.info("Collecting system statistics...")
     
-    await collect_user_stats()
-    await collect_traffic_stats()
-    await collect_payment_stats()
-    await collect_package_stats()
+    collect_user_stats()
+    collect_traffic_stats()
+    collect_payment_stats()
+    collect_package_stats()
     
     logger.info("Statistics collection completed")
 

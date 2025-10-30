@@ -62,3 +62,23 @@ connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection re
 2025-10-30 16:59:18 - traffic_share - ERROR - Failed to connect to Redis: Error 111 connecting to localhost:6379. 111.
 2025-10-30 16:59:18 - traffic_share - INFO - Redis connected for rate limiting
 2025-10-30 16:59:18 - traffic_share - INFO - Traffic Share API started successfully!
+2025-10-30 17:22:02 - traffic_share - INFO - Running cleanup tasks...
+2025-10-30 17:22:02 - traffic_share - ERROR - Error cleaning login codes: (psycopg2.OperationalError) connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-10-30 17:22:02 - traffic_share - ERROR - Error cleaning stale sessions: (psycopg2.OperationalError) connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-10-30 17:22:04 - traffic_share - ERROR - Error cleaning stale packages: (psycopg2.OperationalError) connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-10-30 17:22:04 - traffic_share - INFO - Cleanup tasks completed

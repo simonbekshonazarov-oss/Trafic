@@ -131,6 +131,20 @@ class TrafficSession(Base):
     
     started_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     ended_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    # Aliases for compatibility
+    @property
+    def start_time(self):
+        return self.started_at
+    
+    @property
+    def end_time(self):
+        return self.ended_at
+    
+    @property
+    def bytes_total(self):
+        return self.total_bytes
     
     # Relationships
     user = relationship("User", back_populates="traffic_sessions")
@@ -299,6 +313,7 @@ class Notification(Base):
     notification_type = Column(String(50), nullable=False)
     
     is_read = Column(Boolean, default=False, nullable=False)
+    sent_via_bot = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
